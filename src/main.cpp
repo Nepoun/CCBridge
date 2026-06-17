@@ -1,4 +1,4 @@
-#include "DebugNode.h"
+#include "Nodes.h"
 #include "raylib.h"
 #include "raymath.h"
 #include "rlImGui.h"
@@ -8,6 +8,8 @@
 #include "TurtleRegistry.h"
 #include "IdUtil.h"
 #include "timeUtil.h"
+#include "RaylibPalette.h"
+#include <vector>
 
 static void SetupDefaultLayout(ImGuiID dockspace)
 {
@@ -53,19 +55,29 @@ static void SeedTestData()
     GetTurtleRegistry().Register(t2);
 }
 
-void TimeoutClock(){
+void TimeoutClock()
+{
+    double now = GetBridgeCurrentTime();
     for (auto& [id, turtle] : GetTurtleRegistry().turtles)
     {
-        if (turtle.state.online && GetBridgeCurrentTime() - turtle.state.lastUpdateTime > 10.0)
+        if (!turtle.state.online) continue;
+        if (turtle.state.lastUpdateTime < 0) continue;
+        if (now - turtle.state.lastUpdateTime > 10.0)
+        {
             turtle.state.online = false;
+            if (GetTurtleRegistry().selectedTurtleId == turtle.id)
+                GetTurtleRegistry().selectedTurtleId = -1;
+        }
     }
 }
 
-
 int main()
 {
+
+    // Initialization
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(1280, 800, "CCBridge");
+    LoadPalette("assets/default.pal");
     SetTargetFPS(180);
     rlImGuiSetup(true);
 
@@ -74,30 +86,41 @@ int main()
 
     RenderTexture2D viewport = LoadRenderTexture(800, 600);
 
-    SeedTestData();
     g_server.Start(4242);
-    g_debug.serverPort = 4242;
+    g_debugNode.serverPort = 4242;
     g_alloc_count = g_dealloc_count = g_alloc_bytes = 0;
+
+    std::vector<NodeBase*> nodes = GetNodes();
+
+    // Loop
     while (!WindowShouldClose())
     {
+        float delta = GetFrameTime();
+
+        // Logic based region
+        TimeoutClock();
+
+        // Render
         BeginTextureMode(viewport);
-        ClearBackground(BLACK);
-        DrawCircle(400, 300, 50, RED);
+            ClearBackground(GetColorFromPalette(19));
+            // TODO: Trocar para a renderização maneirissima de turtles
+            // For now  you can leave this red circle that looks like TADC Caine lol
+            DrawCircle(400, 300, 50, RED);
         EndTextureMode();
 
+        // Frame
         BeginDrawing();
         ClearBackground(BLACK);
 
         rlImGuiBegin();
 
-        TimeoutClock();
-
+        // Layout (Dockspace)
         ImGuiID dockspace = ImGui::DockSpaceOverViewport();
         if (ImGui::DockBuilderGetNode(dockspace) == nullptr)
             SetupDefaultLayout(dockspace);
 
-        g_debug.serverConnections = g_server.GetConnectionCount();
 
+        //Menu bar
         if (ImGui::BeginMainMenuBar())
         {
             if (ImGui::BeginMenu("View"))
@@ -112,15 +135,7 @@ int main()
             ImGui::EndMainMenuBar();
         }
 
-        ImGui::Begin("Turtles");
-        for (auto& [id, turtle] : GetTurtleRegistry().turtles)
-        {
-            ImVec4 color = turtle.state.online ? ImVec4(0.3f, 1.f, 0.3f, 1.f) : ImVec4(1.f, 0.3f, 0.3f, 1.f);
-            ImGui::TextColored(color, "[%d] %s", turtle.turtleId, turtle.turtleName.c_str());
-            ImGui::Text("  fuel: %d  pos: %.0f %.0f %.0f", turtle.state.fuel, turtle.state.x, turtle.state.y, turtle.state.z);
-            ImGui::Separator();
-        }
-        ImGui::End();
+        g_debugNode.serverConnections = g_server.GetConnectionCount();
 
         ImGui::Begin("Details");
         ImGui::End();
@@ -129,7 +144,7 @@ int main()
         ImGui::End();
 
         ImGui::Begin("Viewport");
-        rlImGuiImageRenderTextureFit(&viewport, true);
+            rlImGuiImageRenderTextureFit(&viewport, true);
         ImGui::End();
 
         ImGui::Begin("Commands");
@@ -137,8 +152,9 @@ int main()
 
         ImGui::Begin("Tasks");
         ImGui::End();
-
-        g_debug.draw();
+    
+        for (auto* node : nodes)
+            node->draw(delta);
 
         rlImGuiEnd();
         EndDrawing();

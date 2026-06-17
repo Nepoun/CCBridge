@@ -1,12 +1,11 @@
 #pragma once
+#include "NodeBase.h"
 #include "raylib.h"
 #include "rlImGui.h"
 #include "imgui.h"
 #include "TurtleRegistry.h"
+#include "Logger.h"
 #include <algorithm>
-#include <string>
-#include <deque>
-#include <chrono>
 #define WIN32_LEAN_AND_MEAN
 #define NOGDI
 #define NOUSER
@@ -35,44 +34,6 @@ void operator delete(void* ptr, size_t) noexcept
     g_dealloc_count++;
     free(ptr);
 }
-
-// ── Logger ──
-
-enum class LogLevel { INFO, WARNING, ERR };
-
-struct LogEntry
-{
-    LogLevel level;
-    std::string message;
-    std::string timestamp;
-};
-
-struct DebugLogger
-{
-    static constexpr size_t MAX_ENTRIES = 200;
-    std::deque<LogEntry> entries;
-
-    void log(LogLevel level, const std::string& msg)
-    {
-        auto now = std::chrono::system_clock::now();
-        auto t = std::chrono::system_clock::to_time_t(now);
-        char buf[16];
-        strftime(buf, sizeof(buf), "%H:%M:%S", localtime(&t));
-
-        entries.push_back({ level, msg, buf });
-        if (entries.size() > MAX_ENTRIES)
-            entries.pop_front();
-    }
-
-    void info(const std::string& msg)    { log(LogLevel::INFO, msg); }
-    void warning(const std::string& msg) { log(LogLevel::WARNING, msg); }
-    void error(const std::string& msg)   { log(LogLevel::ERR, msg); }
-    void clear()                         { entries.clear(); }
-};
-
-inline DebugLogger g_logger;
-
-// ── Windows helpers ──
 
 static float GetProcessMemoryMB()
 {
@@ -134,9 +95,7 @@ static float GetProcessCpuPercent()
     return std::min(percent, 100.f);
 }
 
-// ── Debug window ──
-
-struct DebugNode
+struct ProfilerNode : public NodeBase
 {
     static constexpr int HISTORY_SIZE = 120;
 
@@ -156,9 +115,13 @@ struct DebugNode
     int serverPort = 0;
     int serverConnections = 0;
 
-    void update()
+    float logHeight = 200.f;
+
+    ProfilerNode() : NodeBase(NextID("node"), "Debug & Profiler", "") {}
+
+    void update(float delta)
     {
-        refreshTimer += GetFrameTime();
+        refreshTimer += delta;
         if (refreshTimer < refreshInterval) return;
         refreshTimer = 0.f;
 
@@ -169,12 +132,12 @@ struct DebugNode
         historyOffset = (historyOffset + 1) % HISTORY_SIZE;
     }
 
-    void draw()
+    void draw(float delta) override
     {
-        update();
+        update(delta);
 
         ImGui::SetNextWindowSize({520, 600}, ImGuiCond_Once);
-        ImGui::Begin("Debug & Profiler");
+        beginWindow();
 
         if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen))
         {
@@ -187,7 +150,6 @@ struct DebugNode
             ImGui::SameLine(160); ImGui::Text("Frame: %.2f ms", frameMs);
             ImGui::Text("RAM:   %.1f MB", memMB);
             ImGui::SameLine(160); ImGui::Text("CPU:   %.1f %%", cpuPct);
-
             ImGui::Spacing();
 
             char overlay[32];
@@ -219,7 +181,6 @@ struct DebugNode
             ImGui::Text("delete: %zu", g_dealloc_count);
             ImGui::Text("total allocated: %.2f MB",
                         static_cast<float>(g_alloc_bytes) / (1024.f * 1024.f));
-
             ImGui::Spacing();
 
             if (diff == 0)
@@ -241,12 +202,10 @@ struct DebugNode
                 if (turtle.state.online) online++;
                 total++;
             }
-            ImGui::Text("Registered:  %d", total);
-            ImGui::Text("Online:      %d", online);
-
             ImGui::Text("Port:        %d", serverPort);
             ImGui::Text("Connections: %d", serverConnections);
-
+            ImGui::Text("Registered:  %d", total);
+            ImGui::Text("Online:      %d", online);
         }
 
         if (ImGui::CollapsingHeader("Log", ImGuiTreeNodeFlags_DefaultOpen))
@@ -262,7 +221,7 @@ struct DebugNode
             if (ImGui::SmallButton("Clear")) g_logger.clear();
 
             ImGui::Separator();
-            ImGui::BeginChild("##log", {-1, -1}, false, ImGuiWindowFlags_HorizontalScrollbar);
+            ImGui::BeginChild("##log", {-1, logHeight}, false, ImGuiWindowFlags_HorizontalScrollbar);
 
             for (auto& e : g_logger.entries)
             {
@@ -273,20 +232,23 @@ struct DebugNode
                 const char* prefix = "[INFO]";
                 if (e.level == LogLevel::WARNING) { color = {1.f, 0.85f, 0.f, 1.f};  prefix = "[WARN]"; }
                 if (e.level == LogLevel::ERR)     { color = {1.f, 0.3f, 0.3f, 1.f};  prefix = "[ERR]";  }
-
+                ImGui::PushTextWrapPos(0.f);
                 ImGui::TextColored({0.5f, 0.5f, 0.5f, 1.f}, "%s", e.timestamp.c_str());
+                ImGui::PopTextWrapPos();
                 ImGui::SameLine();
                 ImGui::TextColored(color, "%s %s", prefix, e.message.c_str());
             }
+
+            if (g_logger.entries.empty())
+                ImGui::TextDisabled("No entries yet!");
 
             if (autoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
                 ImGui::SetScrollHereY(1.f);
 
             ImGui::EndChild();
+            ImGui::SliderFloat("##logHeight", &logHeight, 80.f, 600.f, "height: %.0f");
         }
 
-        ImGui::End();
+        endWindow();
     }
 };
-
-inline DebugNode g_debug;

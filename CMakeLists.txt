@@ -41,6 +41,7 @@ target_include_directories(CCBridge PRIVATE
     src/util/
     src/nodes/
     src/world/
+    src/nodes/
     src/libs/imgui/
     src/libs/rlImGui/
     src/libs/crow/

@@ -6,7 +6,7 @@
 struct TurtleRegistry
 {
     std::unordered_map<int, TurtleBase> turtles;
-
+    int selectedTurtleId = -1;
     void Register(TurtleBase turtle){
         turtles[turtle.id] = turtle;
     }

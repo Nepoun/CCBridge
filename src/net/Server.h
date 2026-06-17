@@ -14,6 +14,7 @@ struct Server
     int GetConnectionCount();
     void Start(int port = 4242);
     void Stop();
+    void DisconnectTurtle(int turtleId);
     void SendCommand(int turtleId, const std::string& command);
 };
 

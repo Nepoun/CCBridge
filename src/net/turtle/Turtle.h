@@ -11,7 +11,7 @@ struct TurtleState
     float x = 0;
     float y = 0;
     float z = 0;
-    double lastUpdateTime = 0.0;
+    double lastUpdateTime = -1.0;
     // Max possible fuel = 100k
     int fuel = 0;
     bool online = false;
