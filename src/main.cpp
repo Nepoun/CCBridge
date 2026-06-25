@@ -38,23 +38,6 @@ static void SetupDefaultLayout(ImGuiID dockspace)
     ImGui::DockBuilderFinish(dockspace);
 }
 
-
-static void SeedTestData()
-{
-    TurtleBase t1(NextID("turtle"), 1, "Mineradora", "Mina carvao");
-    t1.state.x = 100; t1.state.y = 64; t1.state.z = -200;
-    t1.state.fuel = 800;
-    t1.state.online = true;
-
-    TurtleBase t2(NextID("turtle"), 2, "Exploradora", "");
-    t2.state.x = 0; t2.state.y = 70; t2.state.z = 0;
-    t2.state.fuel = 0;
-    t2.state.online = false;
-
-    GetTurtleRegistry().Register(t1);
-    GetTurtleRegistry().Register(t2);
-}
-
 void TimeoutClock()
 {
     double now = GetBridgeCurrentTime();

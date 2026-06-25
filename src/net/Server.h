@@ -11,11 +11,16 @@ struct Server
     std::mutex mutex;
     std::thread thread;
 
+    bool running = false;
+    int port = 0;
+
     int GetConnectionCount();
     void Start(int port = 4242);
     void Stop();
     void DisconnectTurtle(int turtleId);
     void SendCommand(int turtleId, const std::string& command);
+    bool IsRunning() { return running; }
+    int GetPort() { return port; }
 };
 
 inline Server g_server;

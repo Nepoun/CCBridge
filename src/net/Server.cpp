@@ -7,6 +7,7 @@
 #include "json.hpp"
 #include "timeUtil.h"
 #include "Logger.h"
+#include "NetworkUtil.h"
 
 static crow::SimpleApp app;
 static std::unordered_map<int, crow::websocket::connection*> connections;
@@ -46,12 +47,14 @@ void Server::Start(int port)
             }
         })
         .onmessage([this](crow::websocket::connection& conn, const std::string& data, bool isBinary) {
+            g_logger.PrintToConsole("Message received...");
             std::lock_guard<std::mutex> lock(mutex);
 
             auto body = nlohmann::json::parse(data, nullptr, false);
             if (body.is_discarded()) return;
 
             std::string type = body.value("type", "");
+            g_logger.PrintToConsole( g_logger.f("Message of type {}", type ));
 
             if (type == "register")
             {
@@ -59,7 +62,7 @@ void Server::Start(int port)
                 std::string name = body.value("name", "unnamed");
                 std::string desc = body.value("desc", "");
                 g_logger.info("New turtle named " + name + " connected to CCBridge");
-
+                
                 TurtleBase* existing = GetTurtleRegistry().GetByCCId(ccId);
                 if (existing){
                     existing->state.online = true;
@@ -90,32 +93,38 @@ void Server::Start(int port)
             else if (type == "update")
             {
                 int ccId = body["ccId"];
+
                 TurtleBase* turtle = GetTurtleRegistry().GetByCCId(ccId);
                 if (!turtle) return;
                 
-                //g_logger.info("Turtle " + turtle->turtleName + " sent an update");
                 turtle->state.fuel = body.value("fuel", 0);
-                turtle->state.x = body.value("x", 0.0f);
-                turtle->state.y = body.value("y", 0.0f);
-                turtle->state.z = body.value("z", 0.0f);
+                turtle->state.position.x = body.value("x", 0.0f);
+                turtle->state.position.y = body.value("y", 0.0f);
+                turtle->state.position.z = body.value("z", 0.0f);
+
                 turtle->state.online = true;
 
                 
                 turtle->state.lastUpdateTime = GetBridgeCurrentTime();
                 std::string commands = BuildCommandsJson(commandQueues[turtle->id]);
+                
                 conn.send_text("{\"commands\":" + commands + "}");
+                g_logger.PrintToConsole("Send_text done!");
             }
         });
-
+    g_logger.PrintToConsole("5");
     thread = std::thread([port]() {
-        app.port(port).run();
+        app.port(port).multithreaded().run();
     });
     thread.detach();
+    running = true;
+    this->port = port;
 }
 
 void Server::Stop()
 {
     app.stop();
+    running = false;
 }
 
 void Server::DisconnectTurtle(int turtleId)

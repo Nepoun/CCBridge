@@ -25,7 +25,7 @@ struct TurtleListNode : public NodeBase
 
             ImGui::SameLine();
             ImGui::TextColored(color, "[%d] %s", turtle.turtleId, turtle.turtleName.c_str());
-            ImGui::Text("  fuel: %d  pos: %.0f %.0f %.0f", turtle.state.fuel, turtle.state.x, turtle.state.y, turtle.state.z);
+            ImGui::Text(" fuel: %d  pos: %.0f %.0f %.0f", turtle.state.fuel, turtle.state.position.x, turtle.state.position.y, turtle.state.position.z);
             ImGui::SameLine();
 
             if (ImGui::Button("X"))

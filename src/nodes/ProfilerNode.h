@@ -11,6 +11,7 @@
 #define NOUSER
 #include <windows.h>
 #include <psapi.h>
+#include <mutex>
 
 static size_t g_alloc_count = 0;
 static size_t g_dealloc_count = 0;
@@ -222,7 +223,7 @@ struct ProfilerNode : public NodeBase
 
             ImGui::Separator();
             ImGui::BeginChild("##log", {-1, logHeight}, false, ImGuiWindowFlags_HorizontalScrollbar);
-
+            std::lock_guard<std::mutex> lock(g_logger.logMutex);
             for (auto& e : g_logger.entries)
             {
                 if (filterLevel == 1 && e.level == LogLevel::INFO) continue;

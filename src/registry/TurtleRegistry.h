@@ -42,6 +42,34 @@ struct TurtleRegistry
         if (turtle) turtle->state = state;
     }
 
+    void UpdateExpectedPosition(int id, const std::string& command)
+    {
+        TurtleBase* turtle = Get(id);
+        if (!turtle) return;
+
+        Vec3& pos = turtle->state.expectedPosition;
+        int& facing = turtle->state.facing;
+        // Terrible method, need to move this calculation to its own function later
+        if (command == "forward")
+        {
+            if (facing == 0) pos.z -= 1;
+            if (facing == 1) pos.x += 1;
+            if (facing == 2) pos.z += 1;
+            if (facing == 3) pos.x -= 1;
+        }
+        else if (command == "back")
+        {
+            if (facing == 0) pos.z += 1;
+            if (facing == 1) pos.x -= 1;
+            if (facing == 2) pos.z -= 1;
+            if (facing == 3) pos.x += 1;
+        }
+        else if (command == "up") pos.y += 1;
+        else if (command == "down") pos.y -= 1;
+        else if (command == "turn_left") facing = (facing - 1 + 4) % 4;
+        else if (command == "turn_right") facing = (facing + 1) % 4;
+    }
+    
     std::vector<TurtleBase*> GetAll(){
         std::vector<TurtleBase*> result;
         for (auto& [id, turtle] : turtles){

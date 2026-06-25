@@ -5,15 +5,16 @@
 #include "inventory.h"
 #include <memory>
 #include "BasePeripheral.h"
+#include "Vec3.h"
 
 struct TurtleState
 {
-    float x = 0;
-    float y = 0;
-    float z = 0;
+    Vec3 expectedPosition;
+    Vec3 position;
     double lastUpdateTime = -1.0;
     // Max possible fuel = 100k
     int fuel = 0;
+    int facing = 0;
     bool online = false;
     Inventory inventory;
     // shared_prt in case nothing is equipped
