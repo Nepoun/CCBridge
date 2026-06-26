@@ -1,4 +1,4 @@
-<table><tr><td><img src="assets/icon.png" alt="CCBridge logo" width="128"/></td><td><h1>CCBridge</h1>A desktop control center for ComputerCraft turtles, written in C++.</td></tr></table>
+<table border="0" style="border: none; border-collapse: collapse;"><tr><td style="border: none; padding: 0 16px 0 0;"><img src="assets/icon.png" alt="CCBridge logo" width="128"/></td><td style="border: none; vertical-align: middle;"><h1>CCBridge</h1>A desktop control center for ComputerCraft turtles, written in C++.</td></tr></table>
 
 The goal is to bridge CC:Tweaked turtles into a proper desktop interface, making it easier to monitor, debug, and control them without ever opening the in-game terminal.
 
