@@ -72,10 +72,6 @@ ComputerCraft scripts live under `assets/lua/`. See [assets/lua/README.md](asset
 - Support CC:Tweaked addons
 - Be usable by both programmers and non-programmers
 
-## License
-
-MIT. Full text in [LICENSE](LICENSE).
-
 ---
 
 *Screenshot coming once the UI stops changing every other day.*
