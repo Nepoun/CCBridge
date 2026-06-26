@@ -1,8 +1,4 @@
-<img src="assets/icon.png" alt="CCBridge logo" width="128" align="left" style="margin-right: 16px;"/>
-
-# CCBridge
-A desktop control center for ComputerCraft turtles, written in C++.
-<br clear="left"/>
+<table><tr><td><img src="assets/icon.png" alt="CCBridge logo" width="128"/></td><td><h1>CCBridge</h1>A desktop control center for ComputerCraft turtles, written in C++.</td></tr></table>
 
 The goal is to bridge CC:Tweaked turtles into a proper desktop interface, making it easier to monitor, debug, and control them without ever opening the in-game terminal.
 
@@ -75,6 +71,10 @@ ComputerCraft scripts live under `assets/lua/`. See [assets/lua/README.md](asset
 - Load textures and models from a local `.minecraft` installation
 - Support CC:Tweaked addons
 - Be usable by both programmers and non-programmers
+
+## License
+
+MIT. Full text in [LICENSE](LICENSE).
 
 ---
 
