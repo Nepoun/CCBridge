@@ -1,12 +1,10 @@
-
 <img src="assets/icon.png" alt="CCBridge logo" width="128" align="left" style="margin-right: 16px;"/>
 
 # CCBridge
 
 A desktop control center for ComputerCraft turtles, written in C++.
 
-The idea is to bridge and control CC:Tweaked turtles in a way that's easier for non‑technical users to manage.  
-Also, it's a cool side‑project to work on.
+The goal is to bridge CC:Tweaked turtles into a proper desktop interface, making it easier to monitor, debug, and control them without ever opening the in-game terminal.
 
 ![C++20](https://img.shields.io/badge/C%2B%2B-20-blue)
 ![Status](https://img.shields.io/badge/status-alpha-orange)
@@ -14,26 +12,48 @@ Also, it's a cool side‑project to work on.
 
 ---
 
-## Current Status
+## Overview
 
-**Early stage** - most systems are still experimental and subject to major changes.
+CCBridge connects to turtles over WebSocket and exposes their state in a dockable UI built with Dear ImGui. The longer-term goal is a full 3D viewport that loads terrain data directly from the turtles and renders it using textures pulled from a local `.minecraft` installation.
 
-Right now the focus is on:
-- solidifying the communication layer between C++ and turtles,
-- building out the core UI panels,
-- and establishing the 3D world visualization system.
+This is a personal side project, so expect rough edges and breaking changes. The repository is currently a code showcase rather than a ready-to-use tool.
 
-## For Developers
+**Minecraft:** CC:Tweaked 1.119.0 for Minecraft 1.21.1 (NeoForge). Other versions may work but are untested.
 
-This repository is currently meant as a code showcase rather than a ready‑to‑use tool.  
-To get things running you'll need Raylib set up locally, plus a ComputerCraft environment to connect turtles from. Setup instructions will improve as things mature.
+## Status
 
-**Minecraft Version Info:** CC:Tweaked 1.119.0 for Minecraft 1.21.1 (NeoForge).  
-Other versions may work but aren't tested yet
+Early alpha. The communication layer and base UI are working; most of the higher-level features are still in progress.
 
-## Building (rough around the edges)
+Current focus:
+- Stabilizing the WebSocket communication layer
+- Building out core UI panels
+- Laying groundwork for the 3D world visualization
 
-If you want to try building it yourself:
+## Features
+
+**Working now**
+- [x] WebSocket communication backbone
+- [x] Turtle registration and status tracking
+- [x] Dockable UI framework (panels, tabs)
+- [x] Debug and profiler panel
+
+**In progress / planned**
+- [ ] 3D rendering viewport
+- [ ] Turtle details and inventory panels
+- [ ] Block map built from exploration data
+- [ ] Minecraft texture and model loading
+- [ ] Mod support
+- [ ] Lua script sync
+- [ ] GPS auto-setup integration
+
+## Building
+
+> Rough around the edges for now. Proper build docs are coming once things stabilize.
+
+**Requirements:**
+- CMake 3.20+
+- C++20 compiler
+- Dependencies listed in [Tech Stack](#tech-stack) (Raylib needs to be installed manually for now)
 
 ```bash
 git clone https://github.com/Nepoun/CCBridge.git
@@ -41,50 +61,9 @@ cd CCBridge
 ./BuildAndRun.bat
 ```
 
-You'll need CMake 3.20+, a C++20 compiler, and all dependencies from the Tech Stack. I haven't packaged them all yet (missing raylib), so for now you'll have to install them manually. Proper build docs are on the way once the project stabilizes.
-
-## Features
-
-**Communication**  
-WebSocket server, turtle control, registration/unregistration, real‑time state updates, command queue.
-
-**Interface**  
-Dockable window layout, turtle list with online/offline indicators, debug and profiler panel.
-
-**Planned**  
-- [ ] Turtle details & inventory panels
-- [ ] 3D world viewport
-- [ ] Block map from exploration data
-- [ ] Minecraft texture & model loading
-- [ ] Mod support
-- [ ] Lua script sync
-
-*Checklists get ticked as features land!*
-
-## Roadmap
-
-What's already working:
-
-- [x] WebSocket communication backbone
-- [x] Basic turtle registration and status tracking
-- [x] Dockable UI framework (panels, tabs)
-- [x] Debug & profiler panel
-
-Coming next:
-
-- [ ] 3D rendering viewport
-- [ ] Inventory panel and item details
-- [ ] Lua script sync
-- [ ] Full GPS auto‑setup integration
-
 ## Lua Scripts
 
-All ComputerCraft scripts live under `assets/lua/`.  
-A description of each one is in [assets/lua/README.md](assets/lua/README.md).
-
-## Future Plans
-
-Eventually I'll set up a **Turtle Core Script** that can configure everything from a single `pastebin get` command, but that's on the back burner for now. I'll also open‑source everything under a permissive license once the core systems stop shifting every week.
+ComputerCraft scripts live under `assets/lua/`. See [assets/lua/README.md](assets/lua/README.md) for setup instructions.
 
 ## Tech Stack
 
@@ -92,13 +71,11 @@ Eventually I'll set up a **Turtle Core Script** that can configure everything fr
 
 ## Goals
 
-- Remove the need to ever open the turtle terminal for monitoring, debugging, or scripting.
-- Load textures and models directly from a local `.minecraft` installation.
-- Support CC:Tweaked addons.
-- Be usable by both programmers and non‑programmers.
+- Remove the need to open the turtle terminal for monitoring, debugging, or scripting
+- Load textures and models from a local `.minecraft` installation
+- Support CC:Tweaked addons
+- Be usable by both programmers and non-programmers
 
 ---
 
-## Screenshot
-
-*I'll drop a proper UI screenshot here once the interface stops changing every other day. For now, you'll have to take my word that it exists.*
+*Screenshot coming once the UI stops changing every other day.*
